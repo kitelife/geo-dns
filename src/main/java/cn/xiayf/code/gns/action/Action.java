@@ -1,4 +1,4 @@
-package cn.xiayf.code.action;
+package cn.xiayf.code.gns.action;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;

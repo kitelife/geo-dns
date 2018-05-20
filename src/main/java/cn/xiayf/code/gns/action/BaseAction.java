@@ -1,4 +1,4 @@
-package cn.xiayf.code.action;
+package cn.xiayf.code.gns.action;
 
 import java.util.HashMap;
 import java.util.Map;

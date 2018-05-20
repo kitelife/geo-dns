@@ -1,4 +1,4 @@
-package cn.xiayf.code;
+package cn.xiayf.code.gns;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;

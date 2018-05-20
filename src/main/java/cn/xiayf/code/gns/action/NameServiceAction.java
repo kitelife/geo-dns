@@ -1,4 +1,4 @@
-package cn.xiayf.code.action;
+package cn.xiayf.code.gns.action;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,11 +25,10 @@ import javax.naming.directory.InitialDirContext;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
+import cn.xiayf.code.gns.exception.BadReqException;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
-
-import cn.xiayf.code.exception.BadReqException;
 
 public class NameServiceAction extends BaseAction implements Action {
 

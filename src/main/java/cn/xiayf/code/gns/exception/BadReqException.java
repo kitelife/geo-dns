@@ -1,4 +1,4 @@
-package cn.xiayf.code.exception;
+package cn.xiayf.code.gns.exception;
 
 public class BadReqException extends Exception {
 

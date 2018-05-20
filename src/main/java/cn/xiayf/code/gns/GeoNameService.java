@@ -1,10 +1,10 @@
-package cn.xiayf.code;
+package cn.xiayf.code.gns;
 
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import cn.xiayf.code.action.IndexAction;
-import cn.xiayf.code.action.NameServiceAction;
+import cn.xiayf.code.gns.action.IndexAction;
+import cn.xiayf.code.gns.action.NameServiceAction;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;

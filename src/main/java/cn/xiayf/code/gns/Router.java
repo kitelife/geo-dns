@@ -1,13 +1,13 @@
-package cn.xiayf.code;
+package cn.xiayf.code.gns;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 
-import cn.xiayf.code.action.Action;
-import cn.xiayf.code.action.RespBody;
-import cn.xiayf.code.exception.BadReqException;
+import cn.xiayf.code.gns.action.Action;
+import cn.xiayf.code.gns.action.RespBody;
+import cn.xiayf.code.gns.exception.BadReqException;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;

@@ -1,4 +1,4 @@
-package cn.xiayf.code.action;
+package cn.xiayf.code.gns.action;
 
 public class RespBody {
     private int code;
