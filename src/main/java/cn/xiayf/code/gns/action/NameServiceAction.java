@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -22,8 +23,9 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import cn.xiayf.code.gns.exception.BadReqException;
 import io.netty.channel.ChannelHandlerContext;
@@ -39,10 +41,12 @@ public class NameServiceAction extends BaseAction implements Action {
     private static final Boolean lock = true;
 
     private static ExecutorService es;
-    private static Cache<String, Set<String>> globalCache;
+    private static LoadingCache<String, Set<String>> globalCache;
+    private static Set<String> dnsServers;
 
     public NameServiceAction(Properties pps) {
         this.pps = pps;
+        dnsServers = loadDNSServers();
         //
         synchronized(lock) {
             if (es == null) {
@@ -54,7 +58,14 @@ public class NameServiceAction extends BaseAction implements Action {
                         .maximumSize(Integer.valueOf(pps.getProperty("dns.cache.num", "10000")))
                         .expireAfterWrite(Integer.valueOf(
                                 pps.getProperty("dns.cache.life.second", "3600")), TimeUnit.SECONDS)
-                        .build();
+                        .build(new CacheLoader<String, Set<String>>() {
+                            @Override
+                            public Set<String> load(String k) throws Exception {
+                                return resolveDomain(k, dnsServers,
+                                        Integer.valueOf(pps.getProperty("dns.timeout")),
+                                        Integer.valueOf(pps.getProperty("dns.retry.times")));
+                            }
+                        });
             }
         }
     }
@@ -64,21 +75,10 @@ public class NameServiceAction extends BaseAction implements Action {
         if (!urlParams.containsKey("domain")) {
             throw new BadReqException("缺少请求参数domain");
         }
-        String domain = urlParams.get("domain");
-        //
-        Set<String> ips;
-
-        ips = globalCache.getIfPresent(domain);
-        if (ips == null) {
-            ips = resolveDomain(domain, loadDNSServers(),
-                    Integer.valueOf(pps.getProperty("dns.timeout")),
-                    Integer.valueOf(pps.getProperty("dns.retry.times")));
-            globalCache.put(domain, ips);
-        }
-        return new RespBody(HttpResponseStatus.OK.code(), "请求成功", ips);
+        return new RespBody(HttpResponseStatus.OK.code(), "请求成功", globalCache.get(urlParams.get("domain")));
     }
 
-    private static Set<String> resolveDomain(String domain, List<String> dnsServers, int timeout, int retryCount) {
+    private static Set<String> resolveDomain(String domain, Set<String> dnsServers, int timeout, int retryCount) {
         Set<String> ips = new HashSet<>();
         List<Future<List<String>>> futures = new ArrayList<>();
         for (String dnsServer : dnsServers) {
@@ -139,15 +139,12 @@ public class NameServiceAction extends BaseAction implements Action {
         return results;
     }
 
-    private List<String> loadDNSServers() {
-        List<String> dnsServers = new ArrayList<>();
-
+    private Set<String> loadDNSServers() {
         Set<String> pNames = pps.stringPropertyNames();
-        pNames.stream()
+        return pNames.stream()
                 .filter(name -> name.startsWith("dns.servers."))
-                .forEach(name -> dnsServers.addAll(
-                        Arrays.asList(pps.getProperty(name).split(","))
-                        ));
-        return dnsServers;
+                .map(name -> pps.getProperty(name).split(","))
+                .flatMap(Arrays::stream)
+                .collect(Collectors.toSet());
     }
 }
